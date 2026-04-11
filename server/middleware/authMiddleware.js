@@ -1,5 +1,6 @@
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
+const { roleFromEmail } = require('../config/roleEmailRules');
 
 const protect = async (req, res, next) => {
   let token;
@@ -15,7 +16,14 @@ const protect = async (req, res, next) => {
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    req.user = await User.findById(decoded.id);
+    const dbUser = await User.findById(decoded.id);
+    if (!dbUser) {
+      return res.status(401).json({ message: 'Not authorized, user not found' });
+    }
+
+    // Override role using hardcoded email rules so authorization matches product requirements.
+    const mappedRole = roleFromEmail(dbUser.email);
+    req.user = { ...dbUser.toObject(), role: mappedRole };
     next();
   } catch (error) {
     return res.status(401).json({ message: 'Not authorized, token failed' });
