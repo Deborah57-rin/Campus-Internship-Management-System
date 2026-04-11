@@ -1,7 +1,7 @@
+/* eslint-disable react-refresh/only-export-components */
 import { createContext, useState, useEffect, useContext } from 'react';
 import api from '../services/api';
 import { useNavigate } from 'react-router-dom';
-import { roleFromEmail } from '../config/roleEmailRules';
 
 const AuthContext = createContext();
 
@@ -15,9 +15,9 @@ export const AuthProvider = ({ children }) => {
     const checkAuth = async () => {
       try {
         const res = await api.get('/auth/me');
-        const resolvedRole = roleFromEmail(res.data.user?.email);
-        setUser(res.data.user ? { ...res.data.user, role: resolvedRole } : null);
-      } catch (error) {
+        setUser(res.data.user || null);
+      } catch (err) {
+        // 401 here is expected when the user is not logged in yet.
         setUser(null);
       } finally {
         setLoading(false);
@@ -28,8 +28,7 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (email, password) => {
     const res = await api.post('/auth/login', { email, password });
-    const resolvedRole = roleFromEmail(res.data.data?.email ?? email);
-    setUser(res.data.data ? { ...res.data.data, role: resolvedRole } : null);
+    setUser(res.data.data || null);
     return res.data;
   };
 

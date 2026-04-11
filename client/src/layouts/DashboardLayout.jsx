@@ -1,3 +1,5 @@
+/* eslint-disable react-hooks/static-components */
+/* eslint-disable no-unused-vars */
 import { useMemo, useState } from 'react';
 import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { Menu, LogOut, GraduationCap } from 'lucide-react';
@@ -60,7 +62,7 @@ export default function DashboardLayout() {
           Menu
         </p>
         <nav className="space-y-1">
-          {menuItems.map(({ label, to, icon: Icon }) => (
+          {menuItems.map(({ label, to, icon: IconComponent }) => (
             <NavLink
               key={to}
               to={to}
@@ -75,7 +77,7 @@ export default function DashboardLayout() {
                 );
               }}
             >
-              <Icon
+              <IconComponent
                 className={classNames(
                   'h-5 w-5 transition',
                   location.pathname === to || location.pathname.startsWith(`${to}/`)

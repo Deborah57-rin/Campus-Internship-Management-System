@@ -7,7 +7,7 @@ export const LECTURER_EMAILS = [
 ];
 
 export const INTERNSHIP_OFFICER_EMAILS = [
-  // TODO: replace with your 2 internship officer (admin) emails
+  // internship officer (admin) emails
   'officer1@usiu.ac.ke',
   'officer2@usiu.ac.ke',
   'admin@usiu.ac.ke',

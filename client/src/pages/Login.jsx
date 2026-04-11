@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { Lock, Mail, AlertCircle, GraduationCap } from 'lucide-react';
-import { roleFromEmail } from '../config/roleEmailRules';
 
 const Login = () => {
   const [email, setEmail] = useState('');
@@ -20,12 +19,16 @@ const Login = () => {
 
     try {
       const res = await login(email, password);
-      const resolvedRole = roleFromEmail(res?.data?.email ?? email);
+      const resolvedRole = res?.data?.role;
       if (resolvedRole === 'admin') navigate('/admin/dashboard');
       else if (resolvedRole === 'lecturer') navigate('/lecturer/dashboard');
       else navigate('/student/dashboard');
     } catch (err) {
-      setError(err.response?.data?.message || 'Login failed');
+      if (!err.response) {
+        setError('Cannot reach server. Ensure backend is running on port 5000.');
+      } else {
+        setError(err.response?.data?.message || 'Login failed');
+      }
     } finally {
       setIsLoading(false);
     }
