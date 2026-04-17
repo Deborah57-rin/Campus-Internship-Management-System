@@ -1,6 +1,9 @@
 const Class = require('../models/Class');
 const Logbook = require('../models/Logbook');
 const FinalReport = require('../models/FinalReport');
+const WeeklyReport = require('../models/WeeklyReport');
+const InternshipContract = require('../models/InternshipContract');
+const StudentDocuments = require('../models/StudentDocuments');
 
 const lecturerOnly = (user) => {
   if (!user || user.role !== 'lecturer') {
@@ -27,14 +30,17 @@ exports.getLogbooksToReview = async (req, res) => {
   try {
     lecturerOnly(req.user);
 
-    const { status = 'Pending', classId } = req.query;
+    const { status, classId } = req.query;
     const assignedClasses = await Class.find({ lecturer: req.user._id }).select('_id');
     const assignedClassIds = assignedClasses.map((c) => c._id);
 
     const query = {
       class: { $in: assignedClassIds },
-      status,
     };
+
+    if (status && status !== 'all') {
+      query.status = status;
+    }
 
     if (classId) {
       query.class = classId;
@@ -82,6 +88,87 @@ exports.reviewLogbook = async (req, res) => {
   }
 };
 
+exports.getWeeklyReportsToReview = async (req, res) => {
+  try {
+    lecturerOnly(req.user);
+
+    const { status, classId } = req.query;
+    const assignedClasses = await Class.find({ lecturer: req.user._id }).select('_id');
+    const assignedClassIds = assignedClasses.map((c) => c._id);
+
+    const query = { class: { $in: assignedClassIds } };
+    if (status && status !== 'all') query.status = status;
+    if (classId) query.class = classId;
+
+    const reports = await WeeklyReport.find(query)
+      .populate('student', 'name email')
+      .populate('class', 'name code semester academicYear')
+      .sort('-weekStartDate');
+
+    res.status(200).json({ success: true, data: reports });
+  } catch (err) {
+    res.status(err.statusCode || 500).json({ message: err.message || 'Failed to load weekly reports' });
+  }
+};
+
+exports.reviewWeeklyReport = async (req, res) => {
+  try {
+    lecturerOnly(req.user);
+    const { status, lecturerFeedback } = req.body;
+    const { id } = req.params;
+
+    if (!status || !['Approved', 'Rejected', 'Pending'].includes(status)) {
+      return res.status(400).json({ message: 'Invalid status' });
+    }
+
+    const report = await WeeklyReport.findById(id);
+    if (!report) return res.status(404).json({ message: 'Weekly report not found' });
+
+    const classDoc = await Class.findById(report.class).select('lecturer');
+    if (!classDoc || String(classDoc.lecturer) !== String(req.user._id)) {
+      return res.status(403).json({ message: 'Not authorized to review this weekly report' });
+    }
+
+    report.status = status;
+    report.lecturerFeedback = lecturerFeedback ?? report.lecturerFeedback;
+    report.reviewedAt = new Date();
+    await report.save();
+
+    const updated = await WeeklyReport.findById(report._id)
+      .populate('student', 'name email')
+      .populate('class', 'name code');
+
+    res.status(200).json({ success: true, data: updated });
+  } catch (err) {
+    res.status(err.statusCode || 500).json({ message: err.message || 'Failed to review weekly report' });
+  }
+};
+
+exports.getWeeklyReportDailyLogs = async (req, res) => {
+  try {
+    lecturerOnly(req.user);
+    const { id } = req.params;
+
+    const report = await WeeklyReport.findById(id);
+    if (!report) return res.status(404).json({ message: 'Weekly report not found' });
+
+    const classDoc = await Class.findById(report.class).select('lecturer');
+    if (!classDoc || String(classDoc.lecturer) !== String(req.user._id)) {
+      return res.status(403).json({ message: 'Not authorized to view these daily logs' });
+    }
+
+    const logs = await Logbook.find({
+      student: report.student,
+      class: report.class,
+      logDate: { $gte: report.weekStartDate, $lte: report.weekEndDate },
+    }).sort('logDate');
+
+    res.status(200).json({ success: true, data: logs });
+  } catch (err) {
+    res.status(err.statusCode || 500).json({ message: err.message || 'Failed to load daily logs' });
+  }
+};
+
 exports.getLecturerReports = async (req, res) => {
   try {
     lecturerOnly(req.user);
@@ -114,6 +201,13 @@ exports.getLecturerReports = async (req, res) => {
         const finalReports = await FinalReport.find({ class: cls._id, student: { $in: studentIds } });
         const finalByStudent = new Map(finalReports.map((r) => [String(r.student), r]));
 
+        const [contracts, studDocs] = await Promise.all([
+          InternshipContract.find({ student: { $in: studentIds } }).lean(),
+          StudentDocuments.find({ student: { $in: studentIds } }).lean(),
+        ]);
+        const contractByStudent = new Map(contracts.map((c) => [String(c.student), c]));
+        const docsByStudent = new Map(studDocs.map((d) => [String(d.student), d]));
+
         const studentsProgress = students.map((s) => {
           const logs = logbooksByStudent.get(String(s._id)) || [];
           const counts = logs.reduce(
@@ -128,6 +222,8 @@ exports.getLecturerReports = async (req, res) => {
           );
 
           const report = finalByStudent.get(String(s._id));
+          const internshipContract = contractByStudent.get(String(s._id)) || null;
+          const studentDocuments = docsByStudent.get(String(s._id)) || null;
 
           return {
             student: {
@@ -136,12 +232,17 @@ exports.getLecturerReports = async (req, res) => {
               email: s.email,
             },
             logbookStats: counts,
+            internshipContract,
+            studentDocuments,
             finalReport: report
               ? {
                   _id: report._id,
                   status: report.status,
                   title: report.title,
                   reviewedAt: report.reviewedAt,
+                  remarks: report.remarks,
+                  fileUrl: report.fileUrl,
+                  fileOriginalName: report.fileOriginalName,
                 }
               : null,
           };

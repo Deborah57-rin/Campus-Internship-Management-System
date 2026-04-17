@@ -1,8 +1,8 @@
 import {
   LayoutDashboard,
   BookOpenCheck,
+  FileText,
   FileUp,
-  MessageSquareText,
   Users,
   ClipboardList,
   BarChart3,
@@ -13,13 +13,12 @@ export const DASHBOARD_MENUS = {
   student: [
     { label: 'Dashboard', to: '/student/dashboard', icon: LayoutDashboard },
     { label: 'Submit Logbook', to: '/student/logbook/submit', icon: BookOpenCheck },
-    { label: 'Final Report', to: '/student/report', icon: FileUp },
-    { label: 'View Feedback', to: '/student/feedback', icon: MessageSquareText },
+    { label: 'Weekly Reports', to: '/student/weekly-reports', icon: FileText },
+    { label: 'Documents Upload', to: '/student/documents-upload', icon: FileUp },
   ],
   lecturer: [
     { label: 'Dashboard', to: '/lecturer/dashboard', icon: LayoutDashboard },
-    { label: 'My Classes', to: '/lecturer/classes', icon: Users },
-    { label: 'Review Logbooks', to: '/lecturer/logbooks', icon: ClipboardList },
+    { label: 'Review Weekly Reports', to: '/lecturer/weekly-reports', icon: ClipboardList },
     { label: 'Reports', to: '/lecturer/reports', icon: BarChart3 },
   ],
   admin: [

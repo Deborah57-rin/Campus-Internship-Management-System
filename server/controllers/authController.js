@@ -2,6 +2,7 @@ const User = require('../models/User');
 const jwt = require('jsonwebtoken');
 const mongoose = require('mongoose');
 const { roleFromEmail } = require('../config/roleEmailRules');
+const { ensureMongoReady } = require('../utils/mongoReady');
 
 // Generate JWT token
 const generateToken = (id) => {
@@ -14,8 +15,16 @@ const generateToken = (id) => {
 // @route   POST /api/auth/login
 const login = async (req, res) => {
   try {
-    if (mongoose.connection.readyState !== 1) {
-      return res.status(503).json({ message: 'Database unavailable. Check MongoDB Atlas connection.' });
+    const mongo = await ensureMongoReady();
+    if (!mongo.ok) {
+      return res.status(503).json({
+        message:
+          mongo.state === 0
+            ? 'Database is not connected. Check the server terminal for MongoDB errors and that MONGO_URI is set in server/.env.'
+            : `Database is not ready (${mongo.stateName}). Check MongoDB Atlas and try again.`,
+        mongoState: mongo.state,
+        mongoStateName: mongo.stateName,
+      });
     }
 
     const { email, password } = req.body;
@@ -70,11 +79,20 @@ const login = async (req, res) => {
 // @route   GET /api/auth/me
 const getMe = async (req, res) => {
   try {
-    if (mongoose.connection.readyState !== 1) {
-      return res.status(503).json({ message: 'Database unavailable. Check MongoDB Atlas connection.' });
+    const mongo = await ensureMongoReady();
+    if (!mongo.ok) {
+      return res.status(503).json({
+        message:
+          mongo.state === 0
+            ? 'Database is not connected. Check the server terminal for MongoDB errors and that MONGO_URI is set in server/.env.'
+            : `Database is not ready (${mongo.stateName}).`,
+        mongoState: mongo.state,
+        mongoStateName: mongo.stateName,
+      });
     }
 
-    const user = await User.findById(req.user.id);
+    const userId = req.user._id || req.user.id;
+    const user = await User.findById(userId);
     
     if (!user) {
       return res.status(404).json({ message: 'User not found' });

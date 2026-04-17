@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
+import { API_ORIGIN } from '../services/api';
 import { useNavigate } from 'react-router-dom';
 import { Lock, Mail, AlertCircle, GraduationCap } from 'lucide-react';
 
@@ -25,7 +26,7 @@ const Login = () => {
       else navigate('/student/dashboard');
     } catch (err) {
       if (!err.response) {
-        setError('Cannot reach server. Ensure backend is running on port 5000.');
+        setError(`Cannot reach server. Ensure the API is running at ${API_ORIGIN} (see PORT in server/.env).`);
       } else {
         setError(err.response?.data?.message || 'Login failed');
       }

@@ -24,6 +24,11 @@ const finalReportSchema = new mongoose.Schema(
       required: [true, 'Please provide the report file URL or path'],
       trim: true,
     },
+    fileOriginalName: {
+      type: String,
+      trim: true,
+      default: '',
+    },
     remarks: {
       type: String,
       trim: true,

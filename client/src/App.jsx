@@ -3,13 +3,13 @@ import { AuthProvider } from './context/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
 import Login from './pages/Login';
 import DashboardLayout from './layouts/DashboardLayout';
-import PlaceholderPage from './pages/PlaceholderPage';
 import StudentDashboard from './pages/student/StudentDashboard';
 import SubmitLogbook from './pages/student/SubmitLogbook';
+import WeeklyReportsPage from './pages/student/WeeklyReportsPage';
 import FinalReportPage from './pages/student/FinalReportPage';
+import InternshipContractPage from './pages/student/InternshipContractPage';
 import { ToastProvider } from './components/ToastProvider';
 import LecturerDashboard from './pages/lecturer/LecturerDashboard';
-import LecturerMyClasses from './pages/lecturer/LecturerMyClasses';
 import LecturerReviewLogbooks from './pages/lecturer/LecturerReviewLogbooks';
 import LecturerReports from './pages/lecturer/LecturerReports';
 import AdminDashboard from './pages/admin/AdminDashboard';
@@ -65,20 +65,25 @@ function App() {
               }
             />
             <Route
-              path="report"
+              path="weekly-reports"
+              element={
+                <WeeklyReportsPage />
+              }
+            />
+            <Route
+              path="documents-upload"
               element={
                 <FinalReportPage />
               }
             />
+            <Route path="report" element={<Navigate to="/student/documents-upload" replace />} />
             <Route
-              path="feedback"
+              path="internship-contract"
               element={
-                <PlaceholderPage
-                  title="View Feedback"
-                  description="Read lecturer feedback on your logbook entries and report."
-                />
+                <InternshipContractPage />
               }
             />
+            <Route path="internship-contact" element={<Navigate to="/student/internship-contract" replace />} />
             <Route path="" element={<Navigate to="/student/dashboard" replace />} />
             <Route path="*" element={<Navigate to="/student/dashboard" replace />} />
           </Route>
@@ -97,12 +102,12 @@ function App() {
                 element={<LecturerDashboard />}
             />
             <Route
-              path="classes"
-                element={<LecturerMyClasses />}
+              path="weekly-reports"
+                element={<LecturerReviewLogbooks />}
             />
             <Route
               path="logbooks"
-                element={<LecturerReviewLogbooks />}
+                element={<Navigate to="/lecturer/weekly-reports" replace />}
             />
             <Route
               path="reports"

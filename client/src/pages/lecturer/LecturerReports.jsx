@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import api from '../../services/api';
 import { useToast } from '../../components/ToastProvider';
 import StatusBadge from '../../components/StatusBadge';
+import StudentPlacementRecordsModal from '../../components/StudentPlacementRecordsModal';
 
 export default function LecturerReports() {
   const { show } = useToast();
@@ -9,6 +10,7 @@ export default function LecturerReports() {
   const [classId, setClassId] = useState('');
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState([]);
+  const [placementRecord, setPlacementRecord] = useState(null);
 
   useEffect(() => {
     const load = async () => {
@@ -43,19 +45,34 @@ export default function LecturerReports() {
   }, [classId]);
 
   const aggregated = useMemo(() => {
-    const allStudents = data.flatMap((c) => c.studentsProgress || []);
-    const completed = allStudents.filter((s) => s.finalReport).length;
+    const allRows = data.flatMap((c) => c.studentsProgress || []);
+    const uniqueIds = [...new Set(allRows.map((s) => String(s.student?._id)))];
+    const studentsWithReport = new Set(
+      allRows.filter((s) => s.finalReport).map((s) => String(s.student?._id))
+    );
 
-    const totalLogbooks = allStudents.reduce((acc, s) => acc + (s.logbookStats?.total || 0), 0);
-    const approvedLogbooks = allStudents.reduce((acc, s) => acc + (s.logbookStats?.approved || 0), 0);
-    const pendingLogbooks = allStudents.reduce((acc, s) => acc + (s.logbookStats?.pending || 0), 0);
-    const rejectedLogbooks = allStudents.reduce((acc, s) => acc + (s.logbookStats?.rejected || 0), 0);
+    const totalLogbooks = allRows.reduce((acc, s) => acc + (s.logbookStats?.total || 0), 0);
+    const approvedLogbooks = allRows.reduce((acc, s) => acc + (s.logbookStats?.approved || 0), 0);
+    const pendingLogbooks = allRows.reduce((acc, s) => acc + (s.logbookStats?.pending || 0), 0);
+    const rejectedLogbooks = allRows.reduce((acc, s) => acc + (s.logbookStats?.rejected || 0), 0);
 
-    return { totalStudents: allStudents.length, completed, totalLogbooks, approvedLogbooks, pendingLogbooks, rejectedLogbooks };
+    return {
+      totalStudents: uniqueIds.length,
+      completed: studentsWithReport.size,
+      totalLogbooks,
+      approvedLogbooks,
+      pendingLogbooks,
+      rejectedLogbooks,
+    };
   }, [data]);
 
   return (
     <div className="space-y-6">
+      <StudentPlacementRecordsModal
+        open={Boolean(placementRecord)}
+        onClose={() => setPlacementRecord(null)}
+        record={placementRecord}
+      />
       <div className="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-slate-200">
         <div className="grid gap-4 sm:grid-cols-3 sm:items-end">
           <div className="sm:col-span-2">
@@ -78,6 +95,9 @@ export default function LecturerReports() {
             <p className="text-2xl font-semibold text-usiu-navy">
               {aggregated.totalStudents ? Math.round((aggregated.completed / aggregated.totalStudents) * 100) : 0}%
             </p>
+            <p className="mt-1 text-[11px] text-slate-500">
+              {aggregated.completed}/{aggregated.totalStudents} students with a final report
+            </p>
           </div>
         </div>
       </div>
@@ -87,6 +107,7 @@ export default function LecturerReports() {
         <div className="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-slate-200">
           <p className="text-xs font-medium uppercase tracking-wide text-slate-500">Students</p>
           <p className="mt-3 text-2xl font-semibold text-slate-900">{aggregated.totalStudents}</p>
+          
         </div>
         <div className="rounded-2xl bg-emerald-50 p-5 shadow-sm ring-1 ring-emerald-100">
           <p className="text-xs font-medium uppercase tracking-wide text-emerald-700">Final Report Submitted</p>
@@ -128,6 +149,7 @@ export default function LecturerReports() {
                       <th className="px-3 py-2 text-left font-semibold text-slate-700">Student</th>
                       <th className="px-3 py-2 text-left font-semibold text-slate-700">Logbooks</th>
                       <th className="px-3 py-2 text-left font-semibold text-slate-700">Final Report</th>
+                      <th className="px-3 py-2 text-left font-semibold text-slate-700">Contract & docs</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100 bg-white">
@@ -169,6 +191,22 @@ export default function LecturerReports() {
                               Not submitted
                             </span>
                           )}
+                        </td>
+                        <td className="px-3 py-3">
+                          <button
+                            type="button"
+                            onClick={() =>
+                              setPlacementRecord({
+                                student: s.student,
+                                internshipContract: s.internshipContract,
+                                studentDocuments: s.studentDocuments,
+                                finalReport: s.finalReport,
+                              })
+                            }
+                            className="rounded-lg bg-usiu-navy px-3 py-1.5 text-[11px] font-semibold text-white hover:bg-usiu-navy/90"
+                          >
+                            View
+                          </button>
                         </td>
                       </tr>
                     ))}

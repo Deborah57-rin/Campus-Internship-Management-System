@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import api from '../../services/api';
 import { useToast } from '../../components/ToastProvider';
+import StudentPlacementRecordsModal from '../../components/StudentPlacementRecordsModal';
 
 export default function AdminManageStudents() {
   const { show } = useToast();
@@ -20,6 +21,7 @@ export default function AdminManageStudents() {
 
   const [studentSearch, setStudentSearch] = useState('');
   const [selectedEmails, setSelectedEmails] = useState([]);
+  const [placementRecord, setPlacementRecord] = useState(null);
 
   const fetchClasses = async () => {
     try {
@@ -115,6 +117,11 @@ export default function AdminManageStudents() {
 
   return (
     <div className="space-y-6">
+      <StudentPlacementRecordsModal
+        open={Boolean(placementRecord)}
+        onClose={() => setPlacementRecord(null)}
+        record={placementRecord}
+      />
       <div className="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-slate-200">
         <h2 className="text-base font-semibold text-slate-900">Enroll Students into a Class</h2>
         <p className="mt-1 text-xs text-slate-500">Search students, select them, and enroll into the selected class.</p>
@@ -143,6 +150,65 @@ export default function AdminManageStudents() {
           </div>
         </div>
       </div>
+
+      {classDetails?.studentPlacementSummaries?.length ? (
+        <div className="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-slate-200">
+          <h2 className="text-base font-semibold text-slate-900">Enrolled students — internship records</h2>
+          <p className="mt-1 text-xs text-slate-500">
+            View internship contract details and open uploaded PDFs (final report, evaluation, indemnity).
+          </p>
+          <div className="mt-4 overflow-x-auto">
+            <table className="min-w-full divide-y divide-slate-200 text-xs">
+              <thead className="bg-slate-50">
+                <tr>
+                  <th className="px-3 py-2 text-left font-semibold text-slate-700">Student</th>
+                  <th className="px-3 py-2 text-left font-semibold text-slate-700">Contract</th>
+                  <th className="px-3 py-2 text-left font-semibold text-slate-700">Docs</th>
+                  <th className="px-3 py-2 text-left font-semibold text-slate-700"> </th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100 bg-white">
+                {classDetails.studentPlacementSummaries.map((row) => (
+                  <tr key={row.student._id}>
+                    <td className="px-3 py-3">
+                      <div className="font-medium text-slate-900">{row.student.name}</div>
+                      <div className="text-[11px] text-slate-500">{row.student.email}</div>
+                    </td>
+                    <td className="px-3 py-3 text-slate-600">
+                      {row.internshipContract ? (
+                        <span className="text-emerald-700 font-medium">On file</span>
+                      ) : (
+                        <span className="text-slate-400">—</span>
+                      )}
+                    </td>
+                    <td className="px-3 py-3 text-[11px] text-slate-600">
+                      <div>Final: {row.finalReport ? 'Yes' : '—'}</div>
+                      <div>Eval: {row.studentDocuments?.evaluationFormUrl ? 'Yes' : '—'}</div>
+                      <div>Indemnity: {row.studentDocuments?.indemnityFormUrl ? 'Yes' : '—'}</div>
+                    </td>
+                    <td className="px-3 py-3">
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setPlacementRecord({
+                            student: row.student,
+                            internshipContract: row.internshipContract,
+                            studentDocuments: row.studentDocuments,
+                            finalReport: row.finalReport,
+                          })
+                        }
+                        className="rounded-lg bg-usiu-navy px-3 py-1.5 text-[11px] font-semibold text-white hover:bg-usiu-navy/90"
+                      >
+                        View
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      ) : null}
 
       <div className="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-slate-200">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">

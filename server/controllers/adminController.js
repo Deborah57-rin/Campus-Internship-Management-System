@@ -2,6 +2,9 @@ const User = require('../models/User');
 const Class = require('../models/Class');
 const Logbook = require('../models/Logbook');
 const FinalReport = require('../models/FinalReport');
+const WeeklyReport = require('../models/WeeklyReport');
+const InternshipContract = require('../models/InternshipContract');
+const StudentDocuments = require('../models/StudentDocuments');
 const { roleFromEmail } = require('../config/roleEmailRules');
 
 const adminOnly = (user) => {
@@ -131,8 +134,12 @@ exports.deleteClass = async (req, res) => {
     const cls = await Class.findById(classId);
     if (!cls) return res.status(404).json({ message: 'Class not found' });
 
+    const studentIds = cls.students || [];
     await Logbook.deleteMany({ class: classId });
+    await WeeklyReport.deleteMany({ class: classId });
     await FinalReport.deleteMany({ class: classId });
+    await InternshipContract.deleteMany({ student: { $in: studentIds } });
+    await StudentDocuments.deleteMany({ student: { $in: studentIds } });
     await cls.deleteOne();
 
     res.status(200).json({ success: true, data: {} });
@@ -252,7 +259,35 @@ exports.getClassById = async (req, res) => {
       .populate('students', 'name email');
 
     if (!cls) return res.status(404).json({ message: 'Class not found' });
-    res.status(200).json({ success: true, data: cls });
+
+    const payload = cls.toObject();
+    const studentIds = (payload.students || []).map((s) => s._id);
+    const [contracts, studDocs, reports] = await Promise.all([
+      InternshipContract.find({ student: { $in: studentIds } }).lean(),
+      StudentDocuments.find({ student: { $in: studentIds } }).lean(),
+      FinalReport.find({ class: classId, student: { $in: studentIds } }).lean(),
+    ]);
+    const contractByStudent = new Map(contracts.map((c) => [String(c.student), c]));
+    const docByStudent = new Map(studDocs.map((d) => [String(d.student), d]));
+    const reportByStudent = new Map(reports.map((r) => [String(r.student), r]));
+
+    const studentPlacementSummaries = studentIds.map((sid) => {
+      const stu = (payload.students || []).find((s) => String(s._id) === String(sid));
+      return {
+        student: stu || { _id: sid },
+        internshipContract: contractByStudent.get(String(sid)) || null,
+        studentDocuments: docByStudent.get(String(sid)) || null,
+        finalReport: reportByStudent.get(String(sid)) || null,
+      };
+    });
+
+    res.status(200).json({
+      success: true,
+      data: {
+        ...payload,
+        studentPlacementSummaries,
+      },
+    });
   } catch (err) {
     res.status(err.statusCode || 500).json({ message: err.message || 'Failed to get class' });
   }

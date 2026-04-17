@@ -27,8 +27,11 @@ export default function DashboardLayout() {
 
   const headerTitle = useMemo(() => {
     const found = menuItems.find((m) => location.pathname.startsWith(m.to));
+    if (!found && role === 'student' && location.pathname.startsWith('/student/internship-contract')) {
+      return 'Internship Contract';
+    }
     return found?.label || 'Dashboard';
-  }, [location.pathname, menuItems]);
+  }, [location.pathname, menuItems, role]);
 
   const handleLogout = async () => {
     await logout();

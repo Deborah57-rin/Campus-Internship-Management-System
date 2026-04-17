@@ -49,10 +49,8 @@ export default function AdminReports() {
 
   const logbookStats = useMemo(() => {
     if (!report) return null;
-    // When a status filter is applied, show the filtered stats in the class table,
-    // but keep the global cards aligned to the overall dataset.
-    return report.summary.logbookStats;
-  }, [report]);
+    return status ? report.summary.logbookStatsFiltered : report.summary.logbookStats;
+  }, [report, status]);
 
   return (
     <div className="space-y-6">
@@ -89,6 +87,11 @@ export default function AdminReports() {
           <div className="sm:text-right sm:pt-6">
             <p className="text-xs font-medium text-slate-500">Completion rate</p>
             <p className="text-2xl font-semibold text-usiu-navy">{report ? report.summary.completion.completionRate : 0}%</p>
+            {report ? (
+              <p className="mt-1 text-[11px] text-slate-500">
+                {report.summary.completion.completedStudents}/{report.summary.completion.totalStudents} final reports
+              </p>
+            ) : null}
           </div>
         </div>
       </div>
@@ -97,8 +100,13 @@ export default function AdminReports() {
       {!loading && report && logbookStats && (
         <div className="grid gap-4 sm:grid-cols-3">
           <div className="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-slate-200">
-            <p className="text-xs font-medium uppercase tracking-wide text-slate-500">Total Logbooks</p>
+            <p className="text-xs font-medium uppercase tracking-wide text-slate-500">
+              {status ? 'Logbooks (filtered)' : 'Total Logbooks'}
+            </p>
             <p className="mt-3 text-2xl font-semibold text-slate-900">{logbookStats.total}</p>
+            {status ? (
+              <p className="mt-1 text-[11px] text-slate-500">Entries matching the status filter</p>
+            ) : null}
           </div>
           <div className="rounded-2xl bg-amber-50 p-5 shadow-sm ring-1 ring-amber-100">
             <p className="text-xs font-medium uppercase tracking-wide text-amber-800">Pending</p>
