@@ -235,7 +235,7 @@ export default function AdminManageClasses() {
           <div className="sm:col-span-2">
             <button
               type="submit"
-              className="inline-flex items-center justify-center rounded-xl bg-usiu-red px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:brightness-95 focus:outline-none focus:ring-4 focus:ring-usiu-red/20 disabled:cursor-not-allowed disabled:opacity-60"
+              className="inline-flex items-center justify-center rounded-xl bg-usiu-navy px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-usiu-navy/90 focus:outline-none focus:ring-4 focus:ring-usiu-gold/35 disabled:cursor-not-allowed disabled:opacity-60"
             >
               Create Class
             </button>

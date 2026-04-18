@@ -11,12 +11,12 @@
 
   body {
     margin: 0;
-    @apply bg-slate-50 text-slate-900 antialiased;
+    @apply bg-usiu-muted/40 text-slate-900 antialiased;
     font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto,
       Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
   }
 
   a {
-    @apply text-usiu-navy hover:text-usiu-red;
+    @apply text-usiu-navy hover:text-usiu-navy/85;
   }
 }

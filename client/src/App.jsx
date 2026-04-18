@@ -20,11 +20,11 @@ import AdminReports from './pages/admin/AdminReports';
 const Unauthorized = () => (
   <div className="min-h-screen flex items-center justify-center">
     <div className="text-center">
-      <h1 className="text-3xl text-usiu-red font-bold">403 - Unauthorized</h1>
+      <h1 className="text-3xl font-bold text-usiu-navy">403 - Unauthorized</h1>
       <p className="mt-2 text-gray-600">You do not have permission to access this page.</p>
       <button 
         onClick={() => window.history.back()}
-        className="mt-4 px-4 py-2 bg-usiu-navy text-white rounded hover:bg-opacity-90"
+        className="mt-4 rounded bg-usiu-navy px-4 py-2 text-white transition hover:bg-usiu-navy/90 focus:outline-none focus:ring-4 focus:ring-usiu-gold/35"
       >
         Go Back
       </button>

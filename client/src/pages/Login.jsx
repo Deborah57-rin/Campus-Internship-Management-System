@@ -36,21 +36,22 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-usiu-muted/40">
       <div className="relative isolate">
-        {/* Subtle academic background */}
+        {/* Brand-tinted backdrop: primary blue + gold accent */}
         <div
           aria-hidden="true"
-          className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(1200px_circle_at_20%_20%,rgba(11,31,58,0.12),transparent_55%),radial-gradient(900px_circle_at_80%_0%,rgba(193,18,31,0.10),transparent_50%)]"
+          className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(1200px_circle_at_18%_18%,rgba(43,57,144,0.14),transparent_55%),radial-gradient(900px_circle_at_82%_8%,rgba(205,203,5,0.12),transparent_52%)]"
         />
 
         <div className="mx-auto flex min-h-screen max-w-6xl items-center justify-center px-4 py-10 sm:px-6 lg:px-8">
-          <div className="w-full max-w-md overflow-hidden rounded-2xl bg-white shadow-xl ring-1 ring-slate-200">
+          <div className="w-full max-w-md overflow-hidden rounded-2xl bg-white shadow-xl ring-1 ring-slate-200/90">
+            <div className="h-1 bg-gradient-to-r from-usiu-navy via-usiu-navy to-usiu-gold" aria-hidden="true" />
             <div className="p-6 sm:p-10">
               <div className="mx-auto w-full">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <div className="grid h-11 w-11 place-items-center rounded-xl bg-usiu-navy/10 text-usiu-navy ring-1 ring-usiu-navy/15">
+                    <div className="grid h-11 w-11 place-items-center rounded-xl bg-usiu-navy/10 text-usiu-navy ring-1 ring-usiu-gold/30">
                       <GraduationCap className="h-5 w-5" />
                     </div>
                     <div>
@@ -59,7 +60,7 @@ const Login = () => {
                     </div>
                   </div>
                   <div className="text-right">
-                    <p className="text-xs font-medium text-usiu-red">USIU-Africa</p>
+                    <p className="text-xs font-semibold tracking-wide text-usiu-navy">USIU-Africa</p>
                     <p className="text-[11px] text-slate-500">Internship Monitoring</p>
                   </div>
                 </div>
@@ -87,7 +88,7 @@ const Login = () => {
                         type="email"
                         autoComplete="email"
                         required
-                        className="block w-full rounded-xl border border-slate-200 bg-white py-3 pl-10 pr-3 text-sm text-slate-900 shadow-sm outline-none transition focus:border-usiu-navy focus:ring-4 focus:ring-usiu-navy/15"
+                        className="block w-full rounded-xl border border-slate-200 bg-white py-3 pl-10 pr-3 text-sm text-slate-900 shadow-sm outline-none transition focus:border-usiu-navy focus:ring-4 focus:ring-usiu-gold/25"
                         placeholder="student@usiu.ac.ke"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
@@ -108,7 +109,7 @@ const Login = () => {
                         type="password"
                         autoComplete="current-password"
                         required
-                        className="block w-full rounded-xl border border-slate-200 bg-white py-3 pl-10 pr-3 text-sm text-slate-900 shadow-sm outline-none transition focus:border-usiu-navy focus:ring-4 focus:ring-usiu-navy/15"
+                        className="block w-full rounded-xl border border-slate-200 bg-white py-3 pl-10 pr-3 text-sm text-slate-900 shadow-sm outline-none transition focus:border-usiu-navy focus:ring-4 focus:ring-usiu-gold/25"
                         placeholder="••••••••"
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
@@ -119,7 +120,7 @@ const Login = () => {
                   <button
                     type="submit"
                     disabled={isLoading}
-                    className="inline-flex w-full items-center justify-center rounded-xl bg-usiu-red px-4 py-3 text-sm font-semibold text-white shadow-sm transition hover:brightness-95 focus:outline-none focus:ring-4 focus:ring-usiu-red/20 disabled:cursor-not-allowed disabled:opacity-60"
+                    className="inline-flex w-full items-center justify-center rounded-xl bg-usiu-navy px-4 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-usiu-navy/90 focus:outline-none focus:ring-4 focus:ring-usiu-gold/35 disabled:cursor-not-allowed disabled:opacity-60"
                   >
                     {isLoading ? 'Signing in...' : 'Sign in'}
                   </button>

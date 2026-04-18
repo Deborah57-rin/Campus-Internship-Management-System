@@ -28,7 +28,7 @@ export const ToastProvider = ({ children }) => {
             className={`w-full max-w-sm rounded-xl px-4 py-3 text-sm shadow-lg ring-1 ${
               toast.type === 'error'
                 ? 'bg-red-50 text-red-800 ring-red-200'
-                : 'bg-emerald-50 text-emerald-800 ring-emerald-200'
+                : 'border-l-4 border-usiu-gold bg-usiu-muted/80 text-usiu-navy ring-usiu-navy/15'
             }`}
           >
             {toast.message}
